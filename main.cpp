@@ -8,13 +8,9 @@
 #include <vector>
 #include <string>
 
-// ============================================================
-// PART 1: SINGLE NODE FLIP (Singly Linked List)
-// ============================================================
+// part 1: single node flip
 
-/**
- * Node class for singly linked list
- */
+// node for singly linked list
 class Node {
 public:
     char data;
@@ -23,10 +19,7 @@ public:
     Node(char val) : data(val), next(nullptr) {}
 };
 
-/**
- * Build list as specified in assignment
- * Creates the example list: A -> B -> C -> D -> E
- */
+// build list a->b->c->d->e
 Node* buildList() {
     Node* A = new Node('A');
     Node* B = new Node('B');
@@ -40,9 +33,7 @@ Node* buildList() {
     return A;
 }
 
-/**
- * Print list function as specified in assignment
- */
+// print the list
 void printList(Node* head) {
     while (head) {
         std::cout << head->data << " -> ";
@@ -51,15 +42,10 @@ void printList(Node* head) {
     std::cout << "null\n";
 }
 
-/**
- * Flip middle node function
- * Finds middle node using integer math (count / 2) and flips it
- * Returns new head pointer (in case head changes)
- */
+// flip middle node by rewiring pointers
 Node* flipMiddleNode(Node* head) {
     if (!head || !head->next) return head;
     
-    // Count nodes
     int count = 0;
     Node* temp = head;
     while (temp) {
@@ -70,7 +56,6 @@ Node* flipMiddleNode(Node* head) {
     int middleIndex = count / 2;
     if (middleIndex == 0) return head;
     
-    // Find nodes to flip
     Node* beforePrev = nullptr;
     Node* prev = head;
     Node* middle = head;
@@ -83,25 +68,20 @@ Node* flipMiddleNode(Node* head) {
     
     if (!middle) return head;
     
-    // Rewire pointers
-    prev->next = middle->next;      // B points to D
-    middle->next = prev;             // C points to B
+    prev->next = middle->next;
+    middle->next = prev;
     
     if (beforePrev) {
-        beforePrev->next = middle;   // A points to C
+        beforePrev->next = middle;
         return head;
     } else {
-        return middle;               // New head if prev was head
+        return middle;
     }
 }
 
-// ============================================================
-// PART 2: DOUBLE NODE FLIP (Doubly Linked List)
-// ============================================================
+// part 2: double node flip
 
-/**
- * DNode class for doubly linked list
- */
+// node for doubly linked list
 class DNode {
 public:
     char data;
@@ -111,9 +91,7 @@ public:
     DNode(char val) : data(val), prev(nullptr), next(nullptr) {}
 };
 
-/**
- * Build doubly linked list as specified in assignment
- */
+// build doubly linked list a⇄b⇄c⇄d⇄e
 DNode* buildDoublyList() {
     DNode* A = new DNode('A');
     DNode* B = new DNode('B');
@@ -128,9 +106,7 @@ DNode* buildDoublyList() {
     return A;
 }
 
-/**
- * Print doubly linked list
- */
+// print doubly linked list
 void printDoublyList(DNode* head) {
     while (head) {
         std::cout << head->data << " ⇄ ";
@@ -139,13 +115,10 @@ void printDoublyList(DNode* head) {
     std::cout << "null\n";
 }
 
-/**
- * Flip middle node in doubly linked list
- */
+// flip middle node maintaining bidirectional links
 DNode* flipMiddleDoublyNode(DNode* head) {
     if (!head || !head->next) return head;
     
-    // Count nodes
     int count = 0;
     DNode* temp = head;
     while (temp) {
@@ -156,7 +129,6 @@ DNode* flipMiddleDoublyNode(DNode* head) {
     int middleIndex = count / 2;
     if (middleIndex == 0) return head;
     
-    // Find nodes
     DNode* beforePrev = nullptr;
     DNode* prev = head;
     DNode* middle = head;
@@ -171,7 +143,6 @@ DNode* flipMiddleDoublyNode(DNode* head) {
     
     DNode* afterMiddle = middle->next;
     
-    // Rewire bidirectional pointers
     if (beforePrev) {
         beforePrev->next = middle;
         middle->prev = beforePrev;
@@ -190,13 +161,9 @@ DNode* flipMiddleDoublyNode(DNode* head) {
     return beforePrev ? head : middle;
 }
 
-// ============================================================
-// PART 3: TRI-NODE ROTATIONS (Binary Tree)
-// ============================================================
+// part 3: tree rotations
 
-/**
- * TreeNode class for binary tree
- */
+// node for binary tree
 class TreeNode {
 public:
     char data;
@@ -207,9 +174,7 @@ public:
     TreeNode(char val) : data(val), parent(nullptr), left(nullptr), right(nullptr) {}
 };
 
-/**
- * Build tree as specified in assignment
- */
+// build tree structure
 TreeNode* buildTree() {
     TreeNode* P = new TreeNode('P');
     TreeNode* X = new TreeNode('X');
@@ -227,9 +192,7 @@ TreeNode* buildTree() {
     return P;
 }
 
-/**
- * Print tree helper
- */
+// helper for printing tree
 void printTreeHelper(TreeNode* node, int indent) {
     if (!node) return;
     printTreeHelper(node->right, indent + 4);
@@ -237,16 +200,12 @@ void printTreeHelper(TreeNode* node, int indent) {
     printTreeHelper(node->left, indent + 4);
 }
 
-/**
- * Print tree function as specified in assignment
- */
+// print tree
 void printTree(TreeNode* node, int indent = 0) {
     printTreeHelper(node, indent);
 }
 
-/**
- * Left rotation function
- */
+// rotate left
 void rotateLeft(TreeNode* x, TreeNode*& root) {
     if (!x || !x->right) return;
     
@@ -269,9 +228,7 @@ void rotateLeft(TreeNode* x, TreeNode*& root) {
     if (b) b->parent = x;
 }
 
-/**
- * Right rotation function
- */
+// rotate right
 void rotateRight(TreeNode* y, TreeNode*& root) {
     if (!y || !y->left) return;
     
@@ -294,9 +251,7 @@ void rotateRight(TreeNode* y, TreeNode*& root) {
     if (b) b->parent = y;
 }
 
-/**
- * Helper function to find a node by value in the tree
- */
+// find node by value
 TreeNode* findNode(TreeNode* node, char value) {
     if (!node) return nullptr;
     if (node->data == value) return node;
@@ -307,13 +262,9 @@ TreeNode* findNode(TreeNode* node, char value) {
     return findNode(node->right, value);
 }
 
-// ============================================================
-// PART 4: QUAD NODE ROTATION (4-Directional)
-// ============================================================
+// part 4: quad node rotation
 
-/**
- * QuadNode class for 4-directional linked structure
- */
+// node with 4 directions
 class QuadNode {
 public:
     char data;
@@ -326,73 +277,51 @@ public:
                          south(nullptr), west(nullptr) {}
 };
 
-/**
- * Rotor class
- * Manages a QuadNode and performs 90-degree clockwise rotations
- * 
- * Initial (0°):     After 1st (90°):   After 2nd (180°):  After 3rd (270°):
- *     [A]               [D]                [C]                [B]
- *      ↑                 ↑                  ↑                   ↑
- * [D]← X →[B]       [C]← X →[A]        [B]← X →[D]        [A]← X →[C]
- *      ↓                 ↓                  ↓                   ↓
- *     [C]               [B]                [A]                [D]
- */
+// rotor class manages quad node rotation
 class Rotor {
 private:
-    int degrees;      // Current rotation: 0, 90, 180, or 270
-    QuadNode* center; // The central node X
-    QuadNode* nodeA;  // North node initially
-    QuadNode* nodeB;  // East node initially
-    QuadNode* nodeC;  // South node initially
-    QuadNode* nodeD;  // West node initially
+    int degrees;
+    QuadNode* center;
+    QuadNode* nodeA;
+    QuadNode* nodeB;
+    QuadNode* nodeC;
+    QuadNode* nodeD;
     
 public:
-    // Constructor - builds initial quad structure
     Rotor() : degrees(0) {
-        // Create all nodes
         center = new QuadNode('X');
         nodeA = new QuadNode('A');
         nodeB = new QuadNode('B');
         nodeC = new QuadNode('C');
         nodeD = new QuadNode('D');
         
-        // Set up initial configuration (0 degrees)
         center->north = nodeA;
         center->east = nodeB;
         center->south = nodeC;
         center->west = nodeD;
     }
     
-    /**
-     * Rotate clockwise by 90 degrees
-     * Each direction shifts: north→east, east→south, south→west, west→north
-     * Returns the current degree value after rotation
-     */
+    // rotate 90 degrees clockwise
     int rotateClockwise() {
-        // Save current pointers
         QuadNode* tempNorth = center->north;
         QuadNode* tempEast = center->east;
         QuadNode* tempSouth = center->south;
         QuadNode* tempWest = center->west;
         
-        // Rotate: each direction moves clockwise
-        center->east = tempNorth;   // north → east
-        center->south = tempEast;   // east → south
-        center->west = tempSouth;   // south → west
-        center->north = tempWest;   // west → north
+        center->east = tempNorth;
+        center->south = tempEast;
+        center->west = tempSouth;
+        center->north = tempWest;
         
-        // Update rotation tracker
         degrees = (degrees + 90) % 360;
         
         return degrees;
     }
     
-    // Get current rotation degrees
     int getDegrees() const {
         return degrees;
     }
     
-    // Print current configuration
     void print() const {
         std::cout << "    [" << center->north->data << "]\n";
         std::cout << "     ↑\n";
@@ -403,7 +332,6 @@ public:
         std::cout << "Rotation: " << degrees << "°\n\n";
     }
     
-    // Destructor - clean up memory
     ~Rotor() {
         delete center;
         delete nodeA;
@@ -413,9 +341,7 @@ public:
     }
 };
 
-/**
- * Print utility function as specified in assignment
- */
+// demonstrate full rotation cycle
 void PrintRotor(Rotor& r) {
     std::cout << "=== Rotor Full Rotation Test ===\n\n";
     std::cout << "Initial State:\n";
@@ -428,9 +354,7 @@ void PrintRotor(Rotor& r) {
     }
 }
 
-// ============================================================
-// MAIN PROGRAM - Testing All Four Parts
-// ============================================================
+// main program
 
 void printSeparator() {
     std::cout << "\n" << std::string(60, '=') << "\n\n";
