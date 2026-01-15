@@ -145,6 +145,83 @@ public:
 };
 
 // ============================================================
+// FREE FUNCTIONS MATCHING ASSIGNMENT SPECIFICATION
+// ============================================================
+
+/**
+ * Build list as specified in assignment
+ * Creates the example list: A -> B -> C -> D -> E
+ */
+Node* buildList() {
+    Node* A = new Node('A');
+    Node* B = new Node('B');
+    Node* C = new Node('C');
+    Node* D = new Node('D');
+    Node* E = new Node('E');
+    A->next = B;
+    B->next = C;
+    C->next = D;
+    D->next = E;
+    return A;
+}
+
+/**
+ * Print list function as specified in assignment
+ */
+void printList(Node* head) {
+    while (head) {
+        std::cout << head->data << " -> ";
+        head = head->next;
+    }
+    std::cout << "null\n";
+}
+
+/**
+ * Flip middle node function
+ * Finds middle node using integer math (count / 2) and flips it
+ * Returns new head pointer (in case head changes)
+ */
+Node* flipMiddleNode(Node* head) {
+    if (!head || !head->next) return head;
+    
+    // Count nodes
+    int count = 0;
+    Node* temp = head;
+    while (temp) {
+        count++;
+        temp = temp->next;
+    }
+    
+    int middleIndex = count / 2;
+    if (middleIndex == 0) return head;
+    
+    // Find nodes to flip
+    Node* beforePrev = nullptr;
+    Node* prev = head;
+    Node* middle = head;
+    
+    for (int i = 0; i < middleIndex; i++) {
+        beforePrev = prev;
+        prev = middle;
+        middle = middle->next;
+    }
+    
+    if (!middle) return head;
+    
+    // Rewire pointers
+    prev->next = middle->next;      // B points to D
+    middle->next = prev;             // C points to B
+    
+    if (beforePrev) {
+        beforePrev->next = middle;   // A points to C
+        return head;
+    } else {
+        return middle;               // New head if prev was head
+    }
+}
+
+
+// ============================================================
 // PART 2: DOUBLE NODE FLIP (Doubly Linked List)
 // ============================================================
 
@@ -294,6 +371,90 @@ public:
         }
     }
 };
+
+// ============================================================
+// FREE FUNCTIONS FOR PART 2
+// ============================================================
+
+/**
+ * Build doubly linked list as specified in assignment
+ */
+DNode* buildDoublyList() {
+    DNode* A = new DNode('A');
+    DNode* B = new DNode('B');
+    DNode* C = new DNode('C');
+    DNode* D = new DNode('D');
+    DNode* E = new DNode('E');
+    A->next = B;
+    B->prev = A; B->next = C;
+    C->prev = B; C->next = D;
+    D->prev = C; D->next = E;
+    E->prev = D;
+    return A;
+}
+
+/**
+ * Print doubly linked list
+ */
+void printDoublyList(DNode* head) {
+    while (head) {
+        std::cout << head->data << " ⇄ ";
+        head = head->next;
+    }
+    std::cout << "null\n";
+}
+
+/**
+ * Flip middle node in doubly linked list
+ */
+DNode* flipMiddleDoublyNode(DNode* head) {
+    if (!head || !head->next) return head;
+    
+    // Count nodes
+    int count = 0;
+    DNode* temp = head;
+    while (temp) {
+        count++;
+        temp = temp->next;
+    }
+    
+    int middleIndex = count / 2;
+    if (middleIndex == 0) return head;
+    
+    // Find nodes
+    DNode* beforePrev = nullptr;
+    DNode* prev = head;
+    DNode* middle = head;
+    
+    for (int i = 0; i < middleIndex; i++) {
+        beforePrev = prev;
+        prev = middle;
+        middle = middle->next;
+    }
+    
+    if (!middle) return head;
+    
+    DNode* afterMiddle = middle->next;
+    
+    // Rewire bidirectional pointers
+    if (beforePrev) {
+        beforePrev->next = middle;
+        middle->prev = beforePrev;
+    } else {
+        middle->prev = nullptr;
+    }
+    
+    middle->next = prev;
+    prev->prev = middle;
+    
+    prev->next = afterMiddle;
+    if (afterMiddle) {
+        afterMiddle->prev = prev;
+    }
+    
+    return beforePrev ? head : middle;
+}
+
 
 // ============================================================
 // PART 3: TRI-NODE ROTATIONS (Binary Tree)
@@ -475,6 +636,98 @@ private:
 };
 
 // ============================================================
+// FREE FUNCTIONS FOR PART 3
+// ============================================================
+
+/**
+ * Build tree as specified in assignment
+ */
+TreeNode* buildTree() {
+    TreeNode* P = new TreeNode('P');
+    TreeNode* X = new TreeNode('X');
+    TreeNode* A = new TreeNode('A');
+    TreeNode* Y = new TreeNode('Y');
+    TreeNode* B = new TreeNode('B');
+    TreeNode* C = new TreeNode('C');
+
+    P->left = X;       X->parent = P;
+    X->left = A;       A->parent = X;
+    X->right = Y;      Y->parent = X;
+    Y->left = B;       B->parent = Y;
+    Y->right = C;      C->parent = Y;
+
+    return P;
+}
+
+/**
+ * Print tree helper
+ */
+void printTreeHelper(TreeNode* node, int indent) {
+    if (!node) return;
+    printTreeHelper(node->right, indent + 4);
+    std::cout << std::string(indent, ' ') << node->data << "\n";
+    printTreeHelper(node->left, indent + 4);
+}
+
+/**
+ * Print tree function as specified in assignment
+ */
+void printTree(TreeNode* node, int indent = 0) {
+    printTreeHelper(node, indent);
+}
+
+/**
+ * Left rotation function
+ */
+void rotateLeft(TreeNode* x, TreeNode*& root) {
+    if (!x || !x->right) return;
+    
+    TreeNode* y = x->right;
+    TreeNode* p = x->parent;
+    TreeNode* b = y->left;
+    
+    y->parent = p;
+    if (p) {
+        if (p->left == x) p->left = y;
+        else p->right = y;
+    } else {
+        root = y;
+    }
+    
+    y->left = x;
+    x->parent = y;
+    
+    x->right = b;
+    if (b) b->parent = x;
+}
+
+/**
+ * Right rotation function
+ */
+void rotateRight(TreeNode* y, TreeNode*& root) {
+    if (!y || !y->left) return;
+    
+    TreeNode* x = y->left;
+    TreeNode* p = y->parent;
+    TreeNode* b = x->right;
+    
+    x->parent = p;
+    if (p) {
+        if (p->left == y) p->left = x;
+        else p->right = x;
+    } else {
+        root = x;
+    }
+    
+    x->right = y;
+    y->parent = x;
+    
+    y->left = b;
+    if (b) b->parent = y;
+}
+
+
+// ============================================================
 // PART 4: QUAD NODE ROTATION (4-Directional)
 // ============================================================
 
@@ -612,23 +865,30 @@ int main() {
     std::cout << "PART 1: SINGLE NODE FLIP (Singly Linked List)\n";
     printSeparator();
     
+    std::cout << "=== Using Free Functions (Spec-Compliant) ===\n";
+    Node* list1 = buildList();
+    std::cout << "Original list:\n";
+    printList(list1);
+    
+    std::cout << "\nPerforming flip...\n\n";
+    list1 = flipMiddleNode(list1);
+    
+    std::cout << "After flip:\n";
+    printList(list1);
+    std::cout << "Note: C continues to point to D through B\n";
+    
+    std::cout << "\n=== Using OOP Class Approach ===\n";
     std::vector<char> singleList = {'A', 'B', 'C', 'D', 'E'};
     SingleNodeFlipper singleFlipper(singleList);
     
     std::cout << "Original list:\n";
     singleFlipper.print();
     
-    Node* middleNode = singleFlipper.findMiddleNode();
-    std::cout << "\nMiddle node found: " << middleNode->data << "\n\n";
-    
-    std::cout << "Performing flip...\n\n";
+    std::cout << "\nPerforming flip...\n\n";
     singleFlipper.flipMiddle();
     
     std::cout << "After flip:\n";
     singleFlipper.print();
-    
-    std::cout << "\nExpected: A -> C -> B -> D -> E -> null\n";
-    std::cout << "Note: C continues to point to D through B\n";
     
     // ========== PART 2: Double Node Flip ==========
     printSeparator();
