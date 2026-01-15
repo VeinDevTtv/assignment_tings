@@ -1,154 +1,147 @@
-# Node Manipulation Assignment - Usage Guide
+# Usage Guide - Node Manipulation Assignment
 
-## Overview
+## Quick Reference
 
-This implementation provides **TWO approaches** for each part:
+### Part 1: Single Node Flip
 
-1. **Free Functions** - Matching the exact signatures in the assignment specification
-2. **OOP Classes** - Proper object-oriented design with encapsulation
-
-## Part 1: Single Node Flip
-
-### Free Functions (Spec-Compliant)
 ```cpp
-// Build list as shown in assignment
-Node* buildList();
-
-// Print function matching assignment signature  
-void printList(Node* head);
+// Build and print
+Node* list = buildList();
+printList(list);
 
 // Flip middle node
+list = flipMiddleNode(list);
+printList(list);
+
+// Result: A -> C -> B -> D -> E -> null
+```
+
+### Part 2: Double Node Flip
+
+```cpp
+// Build and print
+DNode* dlist = buildDoublyList();
+printDoublyList(dlist);
+
+// Flip middle node
+dlist = flipMiddleDoublyNode(dlist);
+printDoublyList(dlist);
+
+// Result: A ⇄ C ⇄ B ⇄ D ⇄ E ⇄ null
+```
+
+### Part 3: Tree Rotations
+
+```cpp
+// Build tree
+TreeNode* root = buildTree();
+printTree(root);
+
+// Find node and rotate left
+TreeNode* nodeX = findNode(root, 'X');
+rotateLeft(nodeX, root);
+printTree(root);
+
+// Find node and rotate right
+TreeNode* nodeY = findNode(root, 'Y');
+rotateRight(nodeY, root);
+printTree(root);
+```
+
+### Part 4: Quad Rotation
+
+```cpp
+// Create rotor and demonstrate full cycle
+Rotor rotor;
+PrintRotor(rotor);
+
+// Or manual rotation:
+rotor.print();
+int degrees = rotor.rotateClockwise();  // 90°
+rotor.print();
+```
+
+## Function Signatures
+
+### Part 1
+```cpp
+Node* buildList();
+void printList(Node* head);
 Node* flipMiddleNode(Node* head);
 ```
 
-**Usage:**
-```cpp
-Node* list = buildList();           // Creates A -> B -> C -> D -> E
-printList(list);                    // Displays list
-list = flipMiddleNode(list);        // Flips to A -> C -> B -> D -> E
-printList(list);                    // Display result
-```
-
-### OOP Class Approach
-```cpp
-SingleNodeFlipper flipper(values);
-flipper.print();
-flipper.flipMiddle();
-```
-
----
-
-## Part 2: Double Node Flip
-
-### Free Functions
+### Part 2
 ```cpp
 DNode* buildDoublyList();
 void printDoublyList(DNode* head);
 DNode* flipMiddleDoublyNode(DNode* head);
 ```
 
-**Usage:**
-```cpp
-DNode* dlist = buildDoublyList();    // Creates A ⇄ B ⇄ C ⇄ D ⇄ E
-printDoublyList(dlist);
-dlist = flipMiddleDoublyNode(dlist); // Flips to A ⇄ C ⇄ B ⇄ D ⇄ E
-```
-
-### OOP Class Approach
-```cpp
-DoubleNodeFlipper flipper(values);
-flipper.print();
-flipper.flipMiddle();
-```
-
----
-
-## Part 3: Tri-Node Rotations
-
-### Free Functions
+### Part 3
 ```cpp
 TreeNode* buildTree();
 void printTree(TreeNode* node, int indent = 0);
 void rotateLeft(TreeNode* x, TreeNode*& root);
 void rotateRight(TreeNode* y, TreeNode*& root);
+TreeNode* findNode(TreeNode* node, char value);
 ```
 
-**Usage:**
+### Part 4
 ```cpp
-TreeNode* root = buildTree();
-printTree(root);
-
-// Find node X (you'll need to traverse or store reference)
-rotateLeft(nodeX, root);
-printTree(root);
-
-rotateRight(nodeY, root);
+class Rotor {
+    int rotateClockwise();
+    void print() const;
+    int getDegrees() const;
+};
+void PrintRotor(Rotor& r);
 ```
 
-### OOP Class Approach
+## How It Works
+
+### Middle Node Finding
+All flip operations use integer division:
 ```cpp
-TreeRotator rotator;
-rotator.print();
-TreeNode* x = rotator.findNode('X');
-rotator.rotateLeft(x);
+int count = 0;
+while (temp) { count++; temp = temp->next; }
+int middleIndex = count / 2;  // Integer division
 ```
 
----
+For list A → B → C → D → E:
+- count = 5
+- middleIndex = 5 / 2 = 2
+- Middle node = C (0-indexed: A=0, B=1, C=2)
 
-## Part 4: Quad Node Rotation
+### Pointer Rewiring
 
-### Using Rotor Class
-```cpp
-Rotor rotor;
-rotor.print();               // Show current state
-int deg = rotor.rotateClockwise();  // Rotate 90°
+**Single Flip:**
+```
+Before: A → B → C → D → E
+        ^   ^   ^
+        |   |   middle
+        beforePrev prev
+
+Rewire:
+1. B->next = D     (prev->next = middle->next)
+2. C->next = B     (middle->next = prev)
+3. A->next = C     (beforePrev->next = middle)
+
+After:  A → C → B → D → E
 ```
 
-### Using PrintRotor Function (Spec-Compliant)
-```cpp
-Rotor r;
-PrintRotor(r);  // Demonstrates full 360° rotation
-```
+**Double Flip:**
+Same logic but maintains both directions (prev/next pointers).
 
----
+**Tree Rotations:**
+Rewires parent, left, and right pointers according to rotation rules.
 
-## Key Differences
-
-| Aspect | Free Functions | OOP Classes |
-|--------|---------------|-------------|
-| **Matches Spec** | ✅ Exact signatures | Additional approach |
-| **Encapsulation** | ❌ No state management | ✅ Encapsulated |
-| **Memory** | Manual management | Destructors handle cleanup |
-| **Reusability** | Works with raw pointers | Works with any data |
-|**Testing** | Matches assignment examples | More flexible |
-
----
+**Quad Rotation:**
+Shifts north→east, east→south, south→west, west→north every 90°.
 
 ## Compilation
 
-Both approaches are in the same `main.cpp` file:
-
 ```cmd
-cd c:\Personals\assignment1
 g++ -std=c++17 main.cpp -o node_assignment.exe
 node_assignment.exe
 ```
 
----
-
-## Which to Use?
-
-**For Assignment Submission:**
-- Use **free functions** if the grader expects exact function signatures
-- The `buildList()`, `printList()`, etc. match the spec precisely
-
-**For Learning OOP:**
-- Use the **class approach** to demonstrate understanding of:
-  - Constructors and destructors
-  - Encapsulation
-  - General-purpose design
-
-**Safe Bet:**
-- The current `main.cpp` demonstrates **BOTH** approaches
-- Shows free functions first (spec-compliant)
-- Then shows OOP approach for comparison
+All implementations are in a single `main.cpp` file for easy submission.
