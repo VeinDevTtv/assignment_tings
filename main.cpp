@@ -1,446 +1,701 @@
-/**
- * Author: Abdelkarim Ait Bourich
- * Date: 2026-01-15
- * Description: Node manipulation assignment implementing pointer rewiring operations.
- */
-
+// Assignment 2
+// Author: Abdelkarim Ait Bourich
+// Date: 2026-01-22
+// sorry i wasnt able to finish the assignment on time due to some personal issues
 #include <iostream>
-#include <vector>
-#include <string>
+#include <cassert>
+#include <stdexcept>
 
-// part 1: single node flip
+using namespace std;
+
+// part 1: singly linked list
 
 // node for singly linked list
-class Node {
+class SLLNode {
 public:
-    char data;
-    Node* next;
-    
-    Node(char val) : data(val), next(nullptr) {}
+    int data;
+    SLLNode* next;
+
+    SLLNode(int value) : data(value), next(nullptr) {}
 };
 
-// build list a->b->c->d->e
-Node* buildList() {
-    Node* A = new Node('A');
-    Node* B = new Node('B');
-    Node* C = new Node('C');
-    Node* D = new Node('D');
-    Node* E = new Node('E');
-    A->next = B;
-    B->next = C;
-    C->next = D;
-    D->next = E;
-    return A;
+// singly linked list class
+class LinkedList {
+public:
+    LinkedList();
+    ~LinkedList();
+
+    void insertFront(int value);
+    void insertBack(int value);
+    void insertAt(int index, int value);
+
+    void removeFront();
+    void removeBack();
+    void removeAt(int index);
+
+    bool isEmpty() const;
+    int size() const;
+    void clear();
+
+    void print() const;
+    int getAt(int index) const;
+    int indexOf(int value) const;
+
+private:
+    SLLNode* head;
+    int count;
+    SLLNode* getNodeAt(int index) const;
+};
+
+// constructor
+LinkedList::LinkedList() : head(nullptr), count(0) {}
+
+// destructor
+LinkedList::~LinkedList() {
+    clear();
 }
 
-// print the list
-void printList(Node* head) {
-    while (head) {
-        std::cout << head->data << " -> ";
-        head = head->next;
-    }
-    std::cout << "null\n";
+// insert at front
+void LinkedList::insertFront(int value) {
+    SLLNode* newNode = new SLLNode(value);
+    newNode->next = head;
+    head = newNode;
+    count++;
 }
 
-// flip middle node by rewiring pointers
-Node* flipMiddleNode(Node* head) {
-    if (!head || !head->next) return head;
+// insert at back
+void LinkedList::insertBack(int value) {
+    SLLNode* newNode = new SLLNode(value);
     
-    int count = 0;
-    Node* temp = head;
-    while (temp) {
-        count++;
-        temp = temp->next;
-    }
-    
-    int middleIndex = count / 2;
-    if (middleIndex == 0) return head;
-    
-    Node* beforePrev = nullptr;
-    Node* prev = head;
-    Node* middle = head;
-    
-    for (int i = 0; i < middleIndex; i++) {
-        beforePrev = prev;
-        prev = middle;
-        middle = middle->next;
-    }
-    
-    if (!middle) return head;
-    
-    prev->next = middle->next;
-    middle->next = prev;
-    
-    if (beforePrev) {
-        beforePrev->next = middle;
-        return head;
+    if (isEmpty()) {
+        head = newNode;
     } else {
-        return middle;
+        SLLNode* current = head;
+        while (current->next != nullptr) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
+    count++;
+}
+
+// insert at index
+void LinkedList::insertAt(int index, int value) {
+    if (index < 0 || index > count) {
+        throw out_of_range("Index out of range");
+    }
+
+    if (index == 0) {
+        insertFront(value);
+        return;
+    }
+
+    if (index == count) {
+        insertBack(value);
+        return;
+    }
+
+    SLLNode* newNode = new SLLNode(value);
+    SLLNode* prev = getNodeAt(index - 1);
+    newNode->next = prev->next;
+    prev->next = newNode;
+    count++;
+}
+
+// remove from front
+void LinkedList::removeFront() {
+    if (isEmpty()) {
+        throw underflow_error("Cannot remove from empty list");
+    }
+
+    SLLNode* temp = head;
+    head = head->next;
+    delete temp;
+    count--;
+}
+
+// remove from back
+void LinkedList::removeBack() {
+    if (isEmpty()) {
+        throw underflow_error("Cannot remove from empty list");
+    }
+
+    if (count == 1) {
+        delete head;
+        head = nullptr;
+        count--;
+        return;
+    }
+
+    SLLNode* prev = getNodeAt(count - 2);
+    delete prev->next;
+    prev->next = nullptr;
+    count--;
+}
+
+// remove at index
+void LinkedList::removeAt(int index) {
+    if (index < 0 || index >= count) {
+        throw out_of_range("Index out of range");
+    }
+
+    if (index == 0) {
+        removeFront();
+        return;
+    }
+
+    SLLNode* prev = getNodeAt(index - 1);
+    SLLNode* toDelete = prev->next;
+    prev->next = toDelete->next;
+    delete toDelete;
+    count--;
+}
+
+// check if empty
+bool LinkedList::isEmpty() const {
+    return count == 0;
+}
+
+// return size
+int LinkedList::size() const {
+    return count;
+}
+
+// remove all elements
+void LinkedList::clear() {
+    while (!isEmpty()) {
+        removeFront();
     }
 }
 
-// part 2: double node flip
+// print list
+void LinkedList::print() const {
+    SLLNode* current = head;
+    cout << "[";
+    while (current != nullptr) {
+        cout << current->data;
+        if (current->next != nullptr) {
+            cout << " -> ";
+        }
+        current = current->next;
+    }
+    cout << "]" << endl;
+}
+
+// get value at index
+int LinkedList::getAt(int index) const {
+    if (index < 0 || index >= count) {
+        throw out_of_range("Index out of range");
+    }
+    return getNodeAt(index)->data;
+}
+
+// find index of value, returns -1 if not found
+int LinkedList::indexOf(int value) const {
+    SLLNode* current = head;
+    int index = 0;
+    
+    while (current != nullptr) {
+        if (current->data == value) {
+            return index;
+        }
+        current = current->next;
+        index++;
+    }
+    return -1;
+}
+
+// get node at index
+SLLNode* LinkedList::getNodeAt(int index) const {
+    if (index < 0 || index >= count) {
+        throw out_of_range("Index out of range");
+    }
+
+    SLLNode* current = head;
+    for (int i = 0; i < index; i++) {
+        current = current->next;
+    }
+    return current;
+}
+
+
+// part 2: doubly linked list
 
 // node for doubly linked list
-class DNode {
+class DLLNode {
 public:
-    char data;
-    DNode* prev;
-    DNode* next;
-    
-    DNode(char val) : data(val), prev(nullptr), next(nullptr) {}
+    int data;
+    DLLNode* prev;
+    DLLNode* next;
+
+    DLLNode(int value) : data(value), prev(nullptr), next(nullptr) {}
 };
 
-// build doubly linked list a⇄b⇄c⇄d⇄e
-DNode* buildDoublyList() {
-    DNode* A = new DNode('A');
-    DNode* B = new DNode('B');
-    DNode* C = new DNode('C');
-    DNode* D = new DNode('D');
-    DNode* E = new DNode('E');
-    A->next = B;
-    B->prev = A; B->next = C;
-    C->prev = B; C->next = D;
-    D->prev = C; D->next = E;
-    E->prev = D;
-    return A;
+// doubly linked list class
+class DoublyLinkedList {
+public:
+    DoublyLinkedList();
+    virtual ~DoublyLinkedList();
+
+    void insertFront(int value);
+    void insertBack(int value);
+    void insertAt(int index, int value);
+
+    void removeFront();
+    void removeBack();
+    void removeAt(int index);
+
+    bool isEmpty() const;
+    int size() const;
+    void clear();
+
+    void printForward() const;
+    void printBackward() const;
+
+    int getAt(int index) const;
+    int indexOf(int value) const;
+
+protected:
+    DLLNode* head;
+    DLLNode* tail;
+    int count;
+
+    DLLNode* getNodeAt(int index) const;
+};
+
+// constructor
+DoublyLinkedList::DoublyLinkedList() : head(nullptr), tail(nullptr), count(0) {}
+
+// destructor
+DoublyLinkedList::~DoublyLinkedList() {
+    clear();
 }
 
-// print doubly linked list
-void printDoublyList(DNode* head) {
-    while (head) {
-        std::cout << head->data << " ⇄ ";
+// insert at front
+void DoublyLinkedList::insertFront(int value) {
+    DLLNode* newNode = new DLLNode(value);
+
+    if (isEmpty()) {
+        head = tail = newNode;
+    } else {
+        newNode->next = head;
+        head->prev = newNode;
+        head = newNode;
+    }
+    count++;
+}
+
+// insert at back
+void DoublyLinkedList::insertBack(int value) {
+    DLLNode* newNode = new DLLNode(value);
+
+    if (isEmpty()) {
+        head = tail = newNode;
+    } else {
+        newNode->prev = tail;
+        tail->next = newNode;
+        tail = newNode;
+    }
+    count++;
+}
+
+// insert at index
+void DoublyLinkedList::insertAt(int index, int value) {
+    if (index < 0 || index > count) {
+        throw out_of_range("Index out of range");
+    }
+
+    if (index == 0) {
+        insertFront(value);
+        return;
+    }
+
+    if (index == count) {
+        insertBack(value);
+        return;
+    }
+
+    DLLNode* newNode = new DLLNode(value);
+    DLLNode* current = getNodeAt(index);
+    
+    newNode->prev = current->prev;
+    newNode->next = current;
+    current->prev->next = newNode;
+    current->prev = newNode;
+    count++;
+}
+
+// remove from front
+void DoublyLinkedList::removeFront() {
+    if (isEmpty()) {
+        throw underflow_error("Cannot remove from empty list");
+    }
+
+    DLLNode* temp = head;
+
+    if (count == 1) {
+        head = tail = nullptr;
+    } else {
         head = head->next;
+        head->prev = nullptr;
     }
-    std::cout << "null\n";
+
+    delete temp;
+    count--;
 }
 
-// flip middle node maintaining bidirectional links
-DNode* flipMiddleDoublyNode(DNode* head) {
-    if (!head || !head->next) return head;
-    
-    int count = 0;
-    DNode* temp = head;
-    while (temp) {
-        count++;
-        temp = temp->next;
+// remove from back
+void DoublyLinkedList::removeBack() {
+    if (isEmpty()) {
+        throw underflow_error("Cannot remove from empty list");
     }
-    
-    int middleIndex = count / 2;
-    if (middleIndex == 0) return head;
-    
-    DNode* beforePrev = nullptr;
-    DNode* prev = head;
-    DNode* middle = head;
-    
-    for (int i = 0; i < middleIndex; i++) {
-        beforePrev = prev;
-        prev = middle;
-        middle = middle->next;
-    }
-    
-    if (!middle) return head;
-    
-    DNode* afterMiddle = middle->next;
-    
-    if (beforePrev) {
-        beforePrev->next = middle;
-        middle->prev = beforePrev;
+
+    DLLNode* temp = tail;
+
+    if (count == 1) {
+        head = tail = nullptr;
     } else {
-        middle->prev = nullptr;
+        tail = tail->prev;
+        tail->next = nullptr;
     }
-    
-    middle->next = prev;
-    prev->prev = middle;
-    
-    prev->next = afterMiddle;
-    if (afterMiddle) {
-        afterMiddle->prev = prev;
-    }
-    
-    return beforePrev ? head : middle;
+
+    delete temp;
+    count--;
 }
 
-// part 3: tree rotations
+// remove at index
+void DoublyLinkedList::removeAt(int index) {
+    if (index < 0 || index >= count) {
+        throw out_of_range("Index out of range");
+    }
 
-// node for binary tree
-class TreeNode {
-public:
-    char data;
-    TreeNode* parent;
-    TreeNode* left;
-    TreeNode* right;
+    if (index == 0) {
+        removeFront();
+        return;
+    }
+
+    if (index == count - 1) {
+        removeBack();
+        return;
+    }
+
+    DLLNode* toDelete = getNodeAt(index);
+    toDelete->prev->next = toDelete->next;
+    toDelete->next->prev = toDelete->prev;
+    delete toDelete;
+    count--;
+}
+
+// check if empty
+bool DoublyLinkedList::isEmpty() const {
+    return count == 0;
+}
+
+// return size
+int DoublyLinkedList::size() const {
+    return count;
+}
+
+// remove all elements
+void DoublyLinkedList::clear() {
+    while (!isEmpty()) {
+        removeFront();
+    }
+}
+
+// print head to tail
+void DoublyLinkedList::printForward() const {
+    DLLNode* current = head;
+    cout << "[";
+    while (current != nullptr) {
+        cout << current->data;
+        if (current->next != nullptr) {
+            cout << " <-> ";
+        }
+        current = current->next;
+    }
+    cout << "]" << endl;
+}
+
+// print tail to head
+void DoublyLinkedList::printBackward() const {
+    DLLNode* current = tail;
+    cout << "[";
+    while (current != nullptr) {
+        cout << current->data;
+        if (current->prev != nullptr) {
+            cout << " <-> ";
+        }
+        current = current->prev;
+    }
+    cout << "]" << endl;
+}
+
+// get value at index
+int DoublyLinkedList::getAt(int index) const {
+    if (index < 0 || index >= count) {
+        throw out_of_range("Index out of range");
+    }
+    return getNodeAt(index)->data;
+}
+
+// find index of value, returns -1 if not found
+int DoublyLinkedList::indexOf(int value) const {
+    DLLNode* current = head;
+    int index = 0;
+
+    while (current != nullptr) {
+        if (current->data == value) {
+            return index;
+        }
+        current = current->next;
+        index++;
+    }
+    return -1;
+}
+
+// get node at index
+DLLNode* DoublyLinkedList::getNodeAt(int index) const {
+    if (index < 0 || index >= count) {
+        throw out_of_range("Index out of range");
+    }
+
+    DLLNode* current;
     
-    TreeNode(char val) : data(val), parent(nullptr), left(nullptr), right(nullptr) {}
+    if (index < count / 2) {
+        current = head;
+        for (int i = 0; i < index; i++) {
+            current = current->next;
+        }
+    } else {
+        current = tail;
+        for (int i = count - 1; i > index; i--) {
+            current = current->prev;
+        }
+    }
+    
+    return current;
+}
+
+
+// part 3: stack (derived from doubly linked list)
+
+// stack class - lifo behavior using back of list
+class Stack : public DoublyLinkedList {
+public:
+    Stack();
+    ~Stack();
+
+    void push(int value);
+    void pop();
+    int top() const;
+    bool isEmpty() const;
+    int size() const;
+    void clear();
 };
 
-// build tree structure
-TreeNode* buildTree() {
-    TreeNode* P = new TreeNode('P');
-    TreeNode* X = new TreeNode('X');
-    TreeNode* A = new TreeNode('A');
-    TreeNode* Y = new TreeNode('Y');
-    TreeNode* B = new TreeNode('B');
-    TreeNode* C = new TreeNode('C');
+// constructor
+Stack::Stack() : DoublyLinkedList() {}
 
-    P->left = X;       X->parent = P;
-    X->left = A;       A->parent = X;
-    X->right = Y;      Y->parent = X;
-    Y->left = B;       B->parent = Y;
-    Y->right = C;      C->parent = Y;
+// destructor
+Stack::~Stack() {}
 
-    return P;
+// push onto stack
+void Stack::push(int value) {
+    insertBack(value);
 }
 
-// helper for printing tree
-void printTreeHelper(TreeNode* node, int indent) {
-    if (!node) return;
-    printTreeHelper(node->right, indent + 4);
-    std::cout << std::string(indent, ' ') << node->data << "\n";
-    printTreeHelper(node->left, indent + 4);
-}
-
-// print tree
-void printTree(TreeNode* node, int indent = 0) {
-    printTreeHelper(node, indent);
-}
-
-// rotate left
-void rotateLeft(TreeNode* x, TreeNode*& root) {
-    if (!x || !x->right) return;
-    
-    TreeNode* y = x->right;
-    TreeNode* p = x->parent;
-    TreeNode* b = y->left;
-    
-    y->parent = p;
-    if (p) {
-        if (p->left == x) p->left = y;
-        else p->right = y;
-    } else {
-        root = y;
+// pop from stack
+void Stack::pop() {
+    if (isEmpty()) {
+        throw underflow_error("Cannot pop from empty stack");
     }
-    
-    y->left = x;
-    x->parent = y;
-    
-    x->right = b;
-    if (b) b->parent = x;
+    removeBack();
 }
 
-// rotate right
-void rotateRight(TreeNode* y, TreeNode*& root) {
-    if (!y || !y->left) return;
-    
-    TreeNode* x = y->left;
-    TreeNode* p = y->parent;
-    TreeNode* b = x->right;
-    
-    x->parent = p;
-    if (p) {
-        if (p->left == y) p->left = x;
-        else p->right = x;
-    } else {
-        root = x;
+// peek at top
+int Stack::top() const {
+    if (isEmpty()) {
+        throw underflow_error("Cannot peek empty stack");
     }
-    
-    x->right = y;
-    y->parent = x;
-    
-    y->left = b;
-    if (b) b->parent = y;
+    return tail->data;
 }
 
-// find node by value
-TreeNode* findNode(TreeNode* node, char value) {
-    if (!node) return nullptr;
-    if (node->data == value) return node;
-    
-    TreeNode* found = findNode(node->left, value);
-    if (found) return found;
-    
-    return findNode(node->right, value);
+// check if empty
+bool Stack::isEmpty() const {
+    return DoublyLinkedList::isEmpty();
 }
 
-// part 4: quad node rotation
+// return size
+int Stack::size() const {
+    return DoublyLinkedList::size();
+}
 
-// node with 4 directions
-class QuadNode {
+// clear stack
+void Stack::clear() {
+    DoublyLinkedList::clear();
+}
+
+
+// part 4: queue (derived from doubly linked list)
+
+// queue class - fifo behavior
+class Queue : public DoublyLinkedList {
 public:
-    char data;
-    QuadNode* north;
-    QuadNode* east;
-    QuadNode* south;
-    QuadNode* west;
-    
-    QuadNode(char val) : data(val), north(nullptr), east(nullptr), 
-                         south(nullptr), west(nullptr) {}
+    Queue();
+    ~Queue();
+
+    void enqueue(int value);
+    void dequeue();
+    int front() const;
+    bool isEmpty() const;
+    int size() const;
+    void clear();
 };
 
-// rotor class manages quad node rotation
-class Rotor {
-private:
-    int degrees;
-    QuadNode* center;
-    QuadNode* nodeA;
-    QuadNode* nodeB;
-    QuadNode* nodeC;
-    QuadNode* nodeD;
-    
-public:
-    Rotor() : degrees(0) {
-        center = new QuadNode('X');
-        nodeA = new QuadNode('A');
-        nodeB = new QuadNode('B');
-        nodeC = new QuadNode('C');
-        nodeD = new QuadNode('D');
-        
-        center->north = nodeA;
-        center->east = nodeB;
-        center->south = nodeC;
-        center->west = nodeD;
-    }
-    
-    // rotate 90 degrees clockwise
-    int rotateClockwise() {
-        QuadNode* tempNorth = center->north;
-        QuadNode* tempEast = center->east;
-        QuadNode* tempSouth = center->south;
-        QuadNode* tempWest = center->west;
-        
-        center->east = tempNorth;
-        center->south = tempEast;
-        center->west = tempSouth;
-        center->north = tempWest;
-        
-        degrees = (degrees + 90) % 360;
-        
-        return degrees;
-    }
-    
-    int getDegrees() const {
-        return degrees;
-    }
-    
-    void print() const {
-        std::cout << "    [" << center->north->data << "]\n";
-        std::cout << "     ↑\n";
-        std::cout << "[" << center->west->data << "] ← " 
-                  << center->data << " → [" << center->east->data << "]\n";
-        std::cout << "     ↓\n";
-        std::cout << "    [" << center->south->data << "]\n";
-        std::cout << "Rotation: " << degrees << "°\n\n";
-    }
-    
-    ~Rotor() {
-        delete center;
-        delete nodeA;
-        delete nodeB;
-        delete nodeC;
-        delete nodeD;
-    }
-};
+// constructor
+Queue::Queue() : DoublyLinkedList() {}
 
-// demonstrate full rotation cycle
-void PrintRotor(Rotor& r) {
-    std::cout << "=== Rotor Full Rotation Test ===\n\n";
-    std::cout << "Initial State:\n";
-    r.print();
-    
-    for (int i = 0; i < 4; i++) {
-        int degrees = r.rotateClockwise();
-        std::cout << "After rotation to " << degrees << "°:\n";
-        r.print();
-    }
+// destructor
+Queue::~Queue() {}
+
+// add to back
+void Queue::enqueue(int value) {
+    insertBack(value);
 }
 
-// main program
-
-void printSeparator() {
-    std::cout << "\n" << std::string(60, '=') << "\n\n";
+// remove from front
+void Queue::dequeue() {
+    if (isEmpty()) {
+        throw underflow_error("Cannot dequeue from empty queue");
+    }
+    removeFront();
 }
+
+// peek at front
+int Queue::front() const {
+    if (isEmpty()) {
+        throw underflow_error("Cannot peek empty queue");
+    }
+    return head->data;
+}
+
+// check if empty
+bool Queue::isEmpty() const {
+    return DoublyLinkedList::isEmpty();
+}
+
+// return size
+int Queue::size() const {
+    return DoublyLinkedList::size();
+}
+
+// clear queue
+void Queue::clear() {
+    DoublyLinkedList::clear();
+}
+
+
+// validation function
+
+bool validate() {
+    cout << "running validation tests..." << endl << endl;
+
+    // stack test
+    cout << "testing stack..." << endl;
+    Stack s;
+    s.push(10);
+    s.push(20);
+    s.push(30);
+    s.push(40);
+    s.push(50);
+    s.push(60);
+
+    assert(s.top() == 60);
+    cout << "  [pass] s.top() == 60" << endl;
+
+    s.pop();
+    assert(s.top() == 50);
+    cout << "  [pass] after pop(), s.top() == 50" << endl;
+
+    s.clear();
+    assert(s.isEmpty() == true);
+    cout << "  [pass] after clear(), s.isEmpty() == true" << endl;
+
+    cout << "stack tests passed!" << endl << endl;
+
+    // queue test
+    cout << "testing queue..." << endl;
+    Queue q;
+    q.enqueue(100);
+    q.enqueue(200);
+    q.enqueue(300);
+    q.enqueue(400);
+    q.enqueue(500);
+    q.enqueue(600);
+
+    assert(q.front() == 100);
+    cout << "  [pass] q.front() == 100" << endl;
+
+    q.dequeue();
+    assert(q.front() == 200);
+    cout << "  [pass] after dequeue(), q.front() == 200" << endl;
+
+    q.clear();
+    assert(q.isEmpty() == true);
+    cout << "  [pass] after clear(), q.isEmpty() == true" << endl;
+
+    cout << "queue tests passed!" << endl << endl;
+
+    cout << "==================================" << endl;
+    cout << "all validation tests passed!" << endl;
+    cout << "==================================" << endl;
+
+    return true;
+}
+
+
+// main function
 
 int main() {
-    std::cout << "NODE MANIPULATION ASSIGNMENT\n";
-    std::cout << "Four Parts: Single, Double, Tree, and Quad Node Operations\n";
-    
-    // ========== PART 1: Single Node Flip ==========
-    printSeparator();
-    std::cout << "PART 1: SINGLE NODE FLIP (Singly Linked List)\n";
-    printSeparator();
-    
-    Node* list1 = buildList();
-    std::cout << "Original list:\n";
-    printList(list1);
-    
-    std::cout << "\nPerforming flip...\n\n";
-    list1 = flipMiddleNode(list1);
-    
-    std::cout << "After flip:\n";
-    printList(list1);
-    std::cout << "\nExpected: A -> C -> B -> D -> E -> null\n";
-    std::cout << "Note: C continues to point to D through B\n";
-    
-    // ========== PART 2: Double Node Flip ==========
-    printSeparator();
-    std::cout << "PART 2: DOUBLE NODE FLIP (Doubly Linked List)\n";
-    printSeparator();
-    
-    DNode* list2 = buildDoublyList();
-    std::cout << "Original list:\n";
-    printDoublyList(list2);
-    
-    std::cout << "\nPerforming flip...\n\n";
-    list2 = flipMiddleDoublyNode(list2);
-    
-    std::cout << "After flip:\n";
-    printDoublyList(list2);
-    std::cout << "\nExpected: A ⇄ C ⇄ B ⇄ D ⇄ E ⇄ null\n";
-    std::cout << "Note: All bidirectional links are maintained\n";
-    
-    // ========== PART 3: Tri-Node Rotations ==========
-    printSeparator();
-    std::cout << "PART 3: TRI-NODE ROTATIONS (Binary Tree)\n";
-    printSeparator();
-    
-    TreeNode* root = buildTree();
-    std::cout << "Original tree:\n";
-    printTree(root);
-    
-    std::cout << "\nPerforming LEFT ROTATION at X...\n\n";
-    TreeNode* nodeX = findNode(root, 'X');
-    rotateLeft(nodeX, root);
-    
-    std::cout << "After left rotation:\n";
-    printTree(root);
-    
-    std::cout << "\nPerforming RIGHT ROTATION at Y to restore...\n\n";
-    TreeNode* nodeY = findNode(root, 'Y');
-    rotateRight(nodeY, root);
-    
-    std::cout << "After right rotation (restored):\n";
-    printTree(root);
-    std::cout << "\nNote: Tree structure has been restored to original\n";
-    
-    // ========== PART 4: Quad Node Rotation ==========
-    printSeparator();
-    std::cout << "PART 4: QUAD NODE ROTATION (4-Directional)\n";
-    printSeparator();
-    
-    Rotor rotor;
-    PrintRotor(rotor);
-    
-    std::cout << "Note: After 4 rotations (360°), structure returns to original state\n";
-    
-    // ========== Summary ==========
-    printSeparator();
-    std::cout << "ASSIGNMENT COMPLETE\n";
-    printSeparator();
-    std::cout << "All four parts implemented using:\n";
-    std::cout << "- Pointer rewiring only (no node reconstruction)\n";
-    std::cout << "- Free functions matching assignment specification\n";
-    std::cout << "- Rotor class for Part 4\n";
-    printSeparator();
-    
+    cout << "==================================" << endl;
+    cout << "  data structures assignment" << endl;
+    cout << "==================================" << endl << endl;
+
+    validate();
+
+    cout << endl;
+
+    // demo
+    cout << "--- additional demos ---" << endl << endl;
+
+    // linkedlist demo
+    cout << "linkedlist demo:" << endl;
+    LinkedList ll;
+    ll.insertBack(1);
+    ll.insertBack(2);
+    ll.insertBack(3);
+    ll.insertFront(0);
+    ll.print();
+    cout << "  size: " << ll.size() << endl;
+    cout << "  element at index 2: " << ll.getAt(2) << endl;
+    cout << "  index of value 2: " << ll.indexOf(2) << endl;
+    cout << endl;
+
+    // doublylinkedlist demo
+    cout << "doublylinkedlist demo:" << endl;
+    DoublyLinkedList dll;
+    dll.insertBack(10);
+    dll.insertBack(20);
+    dll.insertBack(30);
+    dll.insertFront(5);
+    cout << "  forward:  ";
+    dll.printForward();
+    cout << "  backward: ";
+    dll.printBackward();
+    cout << endl;
+
+    cout << "all demos complete!" << endl;
+
     return 0;
 }
