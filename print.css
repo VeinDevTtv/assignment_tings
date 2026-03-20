@@ -1,0 +1,8 @@
+/* fit results table on one page, avoid cutoff */
+@media print {
+  body { font-size: 11pt; }
+  table { font-size: 9pt; width: 100%; table-layout: fixed; }
+  th, td { padding: 2px 4px; overflow: hidden; }
+}
+table { font-size: 10pt; width: 100%; table-layout: fixed; }
+th, td { padding: 2px 4px; }
